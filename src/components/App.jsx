@@ -1,6 +1,5 @@
 import { Component } from 'react';
-import ImageGallery from './ImageGallery';
-import Searchbar from './Searchbar';
+import Searchbar from './Searchbar/index';
 
 class App extends Component {
   state = {
@@ -11,7 +10,6 @@ class App extends Component {
     return (
       <div>
         <Searchbar />
-        <ImageGallery />
       </div>
     );
   }
