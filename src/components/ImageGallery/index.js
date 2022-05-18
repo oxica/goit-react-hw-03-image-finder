@@ -1,1 +1,1 @@
-// export { default } from './ImageGallery';
+export { ImageGallery } from './ImageGallery';

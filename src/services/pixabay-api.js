@@ -9,7 +9,7 @@ export class ImgApiService {
     this.page = 1;
   }
 
-  async fetchImg() {
+  async fetchImage() {
     const response = await axios.get(
       `${URL}${this.searchQuery}&page=${this.page}&key=${API_KEY}&image_type=photo&orientation=horizontal&per_page=12`
     );
