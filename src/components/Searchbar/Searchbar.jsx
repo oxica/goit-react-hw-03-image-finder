@@ -11,7 +11,7 @@ export class Searchbar extends Component {
     event.preventDefault();
 
     this.props.onSubmit(this.state.value);
-    this.onReset(event);
+    // this.onReset(event);
   };
 
   onChangeInput = event => {
@@ -20,10 +20,10 @@ export class Searchbar extends Component {
     });
   };
 
-  onReset = event => {
-    this.setState({ value: '' });
-    event.target.reset();
-  };
+  // onReset = event => {
+  //   this.setState({ value: '' });
+  //   event.target.reset();
+  // };
 
   render() {
     return (
@@ -59,8 +59,6 @@ export class Searchbar extends Component {
 Searchbar.propTypes = {
   onSubmit: PropTypes.func.isRequired,
 };
-
-
 
 // Компонент принимает один проп onSubmit - функцию для передачи значения инпута при сабмите формы. Создает DOM-элемент следующей структуры.
 
