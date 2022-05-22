@@ -93,8 +93,8 @@ export class App extends Component {
           <Modal onToggleModal={this.onToggleModal} img={largeImageURL} />
         )}
         {isLoading && <Loader />}
-        {imageArr.length >= 12 && (
-          <Button onLoadMore={this.onLoadMore} loading={isLoading} />
+        {imageArr.length >= 12 && !isLoading && (
+          <Button onLoadMore={this.onLoadMore} />
         )}
       </div>
     );

@@ -1,14 +1,12 @@
 import PropTypes from 'prop-types';
 import s from './Button.module.css';
 
-export const Button = ({ onLoadMore, loading }) => {
+export const Button = ({ onLoadMore }) => {
   return (
     <div className={s.thumb}>
-      {!loading && (
-        <button onClick={onLoadMore} className={s.button} type="button">
-          Load More
-        </button>
-      )}
+      <button onClick={onLoadMore} className={s.button} type="button">
+        Load More
+      </button>
     </div>
   );
 };
