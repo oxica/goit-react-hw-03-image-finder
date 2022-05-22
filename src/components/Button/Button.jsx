@@ -13,7 +13,6 @@ export const Button = ({ onLoadMore }) => {
 
 Button.propTypes = {
   onLoadMore: PropTypes.func.isRequired,
-  loading: PropTypes.bool.isRequired,
 };
 
 // При нажатии на кнопку Load more должна догружаться следующая порция изображений и рендериться вместе с предыдущими.
