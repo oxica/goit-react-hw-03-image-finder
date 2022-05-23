@@ -1,102 +1,91 @@
-import { Component } from 'react';
-import { Searchbar } from './Searchbar/Searchbar';
-import { ImageGallery } from './ImageGallery/ImageGallery';
-import { ImgApiService } from '../services/pixabay-api';
-import { Button } from './Button/Button';
-import { Loader } from './Loader/Loader';
-import { Modal } from './Modal/Modal';
-import s from './App.module.css';
+import React, { Component } from 'react';
 
-const imgApiService = new ImgApiService();
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-export class App extends Component {
+import Searchbar from './Searchbar/Searchbar';
+import ImageGallery from './ImageGallery/ImageGallery';
+import Loader from './Loader/Loader';
+import Button from './Button/Button';
+
+export default class App extends Component {
   state = {
-    imageArr: [],
+    URL: 'https://pixabay.com/api/',
+    API_KEY: '25766392-01b12b6ed5ab34bc2910d9c3e',
+    pictures: [],
+    error: '',
+    status: 'idle',
+    page: 1,
     query: '',
-    error: null,
-    isLoading: false,
-    showModal: false,
-    largeImageURL: '',
+    totalHits: null,
+  };
+
+  fetchImg = () => {
+    return fetch(
+      `${this.state.URL}?q=${this.state.query}&page=${this.state.page}&key=${this.state.API_KEY}&image_type=photo&orientation=horizontal&per_page=12`
+    )
+      .then(res => {
+        if (res.ok) {
+          return res.json();
+        }
+        return Promise.reject(new Error('Failed to find any images'));
+      })
+      .then(pictures => {
+        if (!pictures.total) {
+          toast.error('Did find anything, mate');
+        }
+        const selectedProperties = pictures.hits.map(
+          ({ id, largeImageURL, webformatURL }) => {
+            return { id, largeImageURL, webformatURL };
+          }
+        );
+        this.setState(prevState => {
+          return {
+            pictures: [...prevState.pictures, ...selectedProperties],
+            status: 'resolved',
+            totalHits: pictures.total,
+          };
+        });
+      })
+      .catch(error => this.setState({ error, status: 'rejected' }));
   };
 
   componentDidUpdate(prevProps, prevState) {
-    const { query } = this.state;
-    imgApiService.query = query;
-
-    if (prevState.query !== query) {
-      this.onFetchImage();
+    if (this.state.query !== prevState.query) {
+      this.setState({ status: 'pending', pictures: [], page: 1 });
+      this.fetchImg();
+    }
+    if (
+      this.state.query === prevState.query &&
+      this.state.page !== prevState.page
+    ) {
+      this.setState({ status: 'pending' });
+      this.fetchImg();
     }
   }
 
-  onSearch = newQuery => {
-    this.setState({
-      query: newQuery,
+  processSubmit = query => {
+    this.setState({ query });
+  };
+
+  handleLoadMore = () => {
+    this.setState(prevState => {
+      return { page: prevState.page + 1 };
     });
-  };
-
-  onToggleModal = () => {
-    this.setState(({ showModal }) => ({
-      showModal: !showModal,
-    }));
-  };
-
-  onClickImg = event => {
-    this.setState({
-      largeImageURL: this.state.imageArr.find(
-        img => img.webformatURL === event.target.src
-      ).largeImageURL,
-    });
-  };
-
-  onFetchImage = async () => {
-    this.setState({ isLoading: true });
-
-    try {
-      const imageArr = await imgApiService.fetchImage();
-      this.setState({ imageArr });
-    } catch (error) {
-      this.setState({ error });
-    } finally {
-      this.setState({ isLoading: false });
-    }
-  };
-
-  onLoadMore = async () => {
-    this.setState({ isLoading: true });
-
-    try {
-      const imageArr = await imgApiService.fetchImage();
-      this.setState(prevState => ({
-        imageArr: [...prevState.imageArr, ...imageArr],
-      }));
-    } catch (error) {
-      this.setState({ error });
-    } finally {
-      this.setState({ isLoading: false });
-    }
   };
 
   render() {
-    const { isLoading, imageArr, showModal, largeImageURL } = this.state;
+    const { pictures, status, totalHits } = this.state;
     return (
-      <div className={s.container}>
-        <Searchbar onSubmit={this.onSearch} />
-
-        {
-          <ImageGallery
-            onClickImg={this.onClickImg}
-            images={imageArr}
-            onToggleModal={this.onToggleModal}
-          />
-        }
-        {showModal && (
-          <Modal onToggleModal={this.onToggleModal} img={largeImageURL} />
+      <>
+        <Searchbar onSubmit={this.processSubmit} />
+        {pictures.length && <ImageGallery images={pictures} />}
+        {totalHits > pictures.length && (
+          <Button onClick={this.handleLoadMore} />
         )}
-        {isLoading && <Loader />}
-        {imageArr.length >= 12 && !isLoading && (
-          <Button onLoadMore={this.onLoadMore} />
-        )}
-      </div>
+        {status === 'pending' && <Loader />}
+        <ToastContainer autoClose={2000} />
+      </>
     );
   }
 }
